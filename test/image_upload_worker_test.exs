@@ -1,6 +1,5 @@
 defmodule ImageUploadWorkerTest do
   use ExUnit.Case
-  require Logger
 
   # http://elixir-lang.org/docs/stable/ex_unit/ExUnit.Callbacks.html
   setup do
@@ -12,7 +11,8 @@ defmodule ImageUploadWorkerTest do
     assert ImageUploadWorker.queue == []
   end
 
-  @tag :pending
   test "queue can be given data" do
+    ImageUploadWorker.push("Foo")
+    assert ImageUploadWorker.queue == ["Foo"]
   end
 end
