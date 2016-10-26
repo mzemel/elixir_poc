@@ -6,17 +6,23 @@ defmodule ImageUploadStatusTest do
     [statuses: %{image_id: "done"}]
   end
 
-  test "is instantiated", context do
+  test "returns all statuses", context do
     assert ImageUploadStatus.all == context[:statuses]
   end
 
-  test "returns {:ok, status} for ID" do
+  test "successfully fetches a valid id" do
     {:ok, status} = ImageUploadStatus.fetch(:image_id)
     assert status == "done"
   end
 
-  test "returns {:not_found, nil} when ID does not exist" do
+  test "cannot fetch an invalid id" do
     {code, nil} = ImageUploadStatus.fetch(:nonexistent_id)
     assert code == :not_found
+  end
+
+  test "updates a status" do
+    ImageUploadStatus.set(%{image_id: "initial"})
+    {:ok, status} = ImageUploadStatus.fetch(:image_id)
+    assert status == "initial"
   end
 end
