@@ -8,19 +8,25 @@ defmodule ImageUploadWorkerTest do
     Ecto.Adapters.SQL.Sandbox.mode(PhoenixImageSvc.Repo, {:shared, self()})
     
     ImageUploadStatus.start_link(%{})
-    {:ok, id} = ImageUploadWorker.start_link("010101010101")
-    [id: id]
+    ImageUploadWorker.start_link(%{id: nil, image: nil})
+    :ok
+  end
+
+  test "returns no internal data" do
+    assert ImageUploadWorker.image == nil
   end
 
   test "returns internal data" do
-    assert ImageUploadWorker.get_data == "010101010101"
+    ImageUploadWorker.process(%{id: "some_id", image: "010101010101"})
+    assert ImageUploadWorker.image == "010101010101"
   end
 
   # Parallelism is awesome but leads to race conditions
   # Unclear if Worker will have sent message to Status yet
   # So allow for either state -- as long as it's in Status
-  test "sets status in ImageUploadStatus", context do
-    {:ok, status} = ImageUploadStatus.status(context[:id])
+  test "sets status in ImageUploadStatus" do
+    {:ok, id} = ImageUploadWorker.process(%{id: "some_id", image: "010101010101"})
+    {:ok, status} = ImageUploadStatus.status(id)
     assert Enum.member?(["start", "complete"], status) == true
   end
 end
