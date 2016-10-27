@@ -2,17 +2,18 @@ defmodule ImageUploadWorkerTest do
   use ExUnit.Case
 
   # http://elixir-lang.org/docs/stable/ex_unit/ExUnit.Callbacks.html
-  setup do
-    ImageUploadWorker.start_link([])
-    :ok
+  setup_all do
+    ImageUploadStatus.start_link(%{})
+    {:ok, id} = ImageUploadWorker.start_link("010101010101")
+    [id: id]
   end
 
-  test "queue is empty" do
-    assert ImageUploadWorker.queue == []
+  test "returns internal data" do
+    assert ImageUploadWorker.get_data == "010101010101"
   end
 
-  test "queue can be given data" do
-    ImageUploadWorker.push("Foo")
-    assert ImageUploadWorker.queue == ["Foo"]
+  test "sets status in ImageUploadStatus", context do
+    {:ok, status} = ImageUploadStatus.status(context[:id])
+    assert status == "complete"
   end
 end

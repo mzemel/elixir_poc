@@ -12,12 +12,16 @@ defmodule ImageUploadStatus do
     GenServer.call(__MODULE__, :all)
   end
 
-  def fetch(id) do
-    GenServer.call(__MODULE__, {:fetch, id})
+  def status(id) do
+    GenServer.call(__MODULE__, {:status, id})
   end
 
-  def set(update) do
-    GenServer.cast(__MODULE__, {:set, update})
+  def start(id) do
+    GenServer.cast(__MODULE__, {:start, id})
+  end
+
+  def complete(id) do
+    GenServer.cast(__MODULE__, {:complete, id})
   end
 
   ####
@@ -27,15 +31,28 @@ defmodule ImageUploadStatus do
     { :reply, statuses, statuses }
   end
 
-  def handle_call({:fetch, id}, _from, statuses) do
+  # Potential refactor -- get these to work, then eliminate fn below
+  #
+  # def handle_call({:status, id}, _from, %{^id => status} = statuses) do
+  #   { :reply, {:ok, status}, statuses }
+  # end
+
+  # def handle_call({:status, id}, _from, statuses) do
+  #   { :reply, {:not_found, nil}, statuses }
+  # end
+
+  def handle_call({:status, id}, _from, statuses) do
     case Map.get(statuses, id) do
       nil -> { :reply, {:not_found, nil}, statuses }
       status -> { :reply, {:ok, status}, statuses }
     end
   end
 
-  def handle_cast({:set, update}, statuses) do
-    { :noreply, Map.merge(statuses, update) }
+  def handle_cast({:start, id}, statuses) do
+    { :noreply, Map.merge(statuses, %{id => "start"}) }
   end
 
+  def handle_cast({:complete, id}, statuses) do
+    { :noreply, Map.merge(statuses, %{id => "complete"}) }
+  end
 end
