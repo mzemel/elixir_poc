@@ -35,7 +35,6 @@ defmodule ImageUploadWorker do
   def handle_cast({:process, data}, _state) do
     # Process image
     # Upload to S3
-    # Update record in db w/ public URL
     :timer.sleep(500)
     ImageUploadStatus.complete(data[:id])
     # { :noreply, %{id: nil, image: nil} } # This would reset the state to empty
