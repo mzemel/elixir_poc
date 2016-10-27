@@ -42,12 +42,14 @@ threads = []
     Thread.current[:id] = post_data!
     get_status_until_complete!(status_uri(Thread.current[:id]))
     finish = Time.now.to_f
-    Thread.current[:time_elapsed] = "#{finish - start}s elapsed"
+    Thread.current[:time_elapsed] = finish - start
   end
 end
 
 threads.each(&:join)
 
-threads.each do |t|
-  puts "id: #{t[:id]}, #{t[:time_elapsed]}"
-end
+total = threads.each do |t|
+  puts "id: #{t[:id]}, #{t[:time_elapsed]}s elapsed"
+end.map{|t| t[:time_elapsed]}.inject(:+)
+
+puts "#{total / 10}s average"
