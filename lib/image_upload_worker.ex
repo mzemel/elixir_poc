@@ -1,18 +1,19 @@
-require IEx;
-
 defmodule ImageUploadWorker do
   use GenServer
+
+  alias PhoenixImageSvc.Upload
+  alias PhoenixImageSvc.Repo
 
   ####
   # External API
 
   def start_link(data) do
-    # {:ok, id} = Repo.insert(%Upload{started_at: Time.now})
-    id = "some_id" # Replace with above line
-    {:ok, _pid} = GenServer.start_link(__MODULE__, %{id: id, data: data}, name: __MODULE__)
-    ImageUploadStatus.start(id)
+    # TODO: Remove `name` attribute
+    {:ok, upload} = Upload.changeset(%Upload{}, %{name: "test"}) |> Repo.insert
+    GenServer.start_link(__MODULE__, %{id: upload.id, data: data}, name: __MODULE__)
+    ImageUploadStatus.start(upload.id)
     GenServer.cast(__MODULE__, :process)
-    {:ok, id}
+    {:ok, upload.id}
   end
 
   def get_data do
@@ -33,5 +34,4 @@ defmodule ImageUploadWorker do
     ImageUploadStatus.complete(state[:id])
     { :noreply, state }
   end
-
 end
