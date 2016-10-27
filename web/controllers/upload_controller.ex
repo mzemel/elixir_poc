@@ -1,21 +1,12 @@
 defmodule PhoenixImageSvc.UploadController do
   use PhoenixImageSvc.Web, :controller
 
-  alias PhoenixImageSvc.Upload
-
   def create(conn, %{"upload" => upload_params}) do
-    changeset = Upload.changeset(%Upload{}, upload_params)
-
-    case Repo.insert(changeset) do
-      {:ok, upload} ->
-        conn
-        |> put_status(:created)
-        |> put_resp_header("location", upload_path(conn, :show, upload))
-        |> render("show.json", upload: upload)
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> render(PhoenixImageSvc.ChangesetView, "error.json", changeset: changeset)
+    case ImageUploadWorker.process(upload_params) do
+      {:ok, id} ->
+        render conn, "show.json", id: id
+      _ ->
+        render conn, "show.json", id: nil
     end
   end
 end

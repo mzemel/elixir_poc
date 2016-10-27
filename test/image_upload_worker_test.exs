@@ -13,11 +13,12 @@ defmodule ImageUploadWorkerTest do
   end
 
   test "returns no internal data" do
+    ImageUploadWorker.process(nil)
     assert ImageUploadWorker.image == nil
   end
 
   test "returns internal data" do
-    ImageUploadWorker.process(%{id: "some_id", image: "010101010101"})
+    ImageUploadWorker.process("010101010101")
     assert ImageUploadWorker.image == "010101010101"
   end
 
@@ -25,7 +26,7 @@ defmodule ImageUploadWorkerTest do
   # Unclear if Worker will have sent message to Status yet
   # So allow for either state -- as long as it's in Status
   test "sets status in ImageUploadStatus" do
-    {:ok, id} = ImageUploadWorker.process(%{id: "some_id", image: "010101010101"})
+    {:ok, id} = ImageUploadWorker.process("010101010101")
     {:ok, status} = ImageUploadStatus.status(id)
     assert Enum.member?(["start", "complete"], status) == true
   end

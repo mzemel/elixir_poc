@@ -2,12 +2,13 @@ defmodule ImageUploadStatusTest do
   use ExUnit.Case
 
   setup do
-    ImageUploadStatus.start_link(%{"image_id" => "start"})
-    [statuses: %{"image_id" => "start"}]
+    ImageUploadStatus.clear
+    ImageUploadStatus.start("image_id")
+    :ok
   end
 
-  test "returns all statuses", context do
-    assert ImageUploadStatus.all == context[:statuses]
+  test "returns all statuses" do
+    assert ImageUploadStatus.all == %{"image_id" => "start"}
   end
 
   test "successfully returns status of a valid id" do
@@ -16,8 +17,8 @@ defmodule ImageUploadStatusTest do
   end
 
   test "cannot return status of an invalid id" do
-    {code, nil} = ImageUploadStatus.status("nonexistent_id")
-    assert code == :not_found
+    {:ok, status} = ImageUploadStatus.status("nonexistent_id")
+    assert status == "not found"
   end
 
   test "adds a status as start" do
@@ -30,5 +31,12 @@ defmodule ImageUploadStatusTest do
     ImageUploadStatus.complete("image_id")
     {:ok, status} = ImageUploadStatus.status("image_id")
     assert status == "complete"
+  end
+
+  test "clear removes all statuses" do
+    ImageUploadStatus.start("second_image_id")
+    ImageUploadStatus.clear
+    {:ok, status} = ImageUploadStatus.status("image_id")
+    assert status == "not found"
   end
 end

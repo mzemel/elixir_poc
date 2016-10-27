@@ -24,6 +24,10 @@ defmodule ImageUploadStatus do
     GenServer.cast(__MODULE__, {:complete, id})
   end
 
+  def clear do
+    GenServer.cast(__MODULE__, :clear)
+  end
+
   ####
   # GenServer implementation
 
@@ -43,7 +47,7 @@ defmodule ImageUploadStatus do
 
   def handle_call({:status, id}, _from, statuses) do
     case Map.get(statuses, id) do
-      nil -> { :reply, {:not_found, nil}, statuses }
+      nil -> { :reply, {:ok, "not found"}, statuses }
       status -> { :reply, {:ok, status}, statuses }
     end
   end
@@ -54,5 +58,9 @@ defmodule ImageUploadStatus do
 
   def handle_cast({:complete, id}, statuses) do
     { :noreply, Map.merge(statuses, %{id => "complete"}) }
+  end
+
+  def handle_cast(:clear, _statuses) do
+    { :noreply, %{} }
   end
 end

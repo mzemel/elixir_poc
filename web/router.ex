@@ -22,6 +22,7 @@ defmodule PhoenixImageSvc.Router do
   scope "/api", PhoenixImageSvc do
     pipe_through :api
 
-    resources "/uploads", UploadController, only: [:create, :show]
+    resources "/uploads", UploadController, only: [:create]
+    resources "/status", StatusController, only: [:show]
   end
 end

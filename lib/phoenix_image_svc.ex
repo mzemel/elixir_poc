@@ -20,6 +20,8 @@ defmodule PhoenixImageSvc do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: PhoenixImageSvc.Supervisor]
     Supervisor.start_link(children, opts)
+    ImageUploadStatus.start_link(%{})
+    ImageUploadWorker.start_link(%{id: nil, image: nil})
   end
 
   # Tell Phoenix to update the endpoint configuration
