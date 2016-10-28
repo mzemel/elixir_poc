@@ -4,19 +4,33 @@ require 'net/http'
 require 'uri'
 require 'json'
 
-POST_URI = URI.parse('http://localhost:4000/api/uploads')
+@request_count = (ENV["REQUESTS"] || 10).to_i
+@target = ENV["TARGET"] || "elixir"
+
+def post_uri
+  @post_uri ||= if @target == "elixir"
+    URI.parse("http://localhost:4000/api/uploads")
+  else
+    URI.parse("http://localhost:3000/uploads")
+  end
+end
 
 def post_data!
-  http = Net::HTTP.new(POST_URI.host, POST_URI.port)
-  request = Net::HTTP::Post.new(POST_URI.request_uri, 
+  http = Net::HTTP.new(post_uri.host, post_uri.port)
+  request = Net::HTTP::Post.new(post_uri.request_uri, 
             'Content-Type' => 'application/json')
   request.body = {upload: {name: "something"}}.to_json
   resp = http.request(request).body
   JSON.parse(resp)["id"]
 end
 
+# Don't memoize since ivar state is shared across threads
 def status_uri(id)
-  URI.parse("http://localhost:4000/api/status/#{id}")
+  if @target == "elixir"
+    URI.parse("http://localhost:4000/api/status/#{id}")
+  else
+    URI.parse("http://localhost:3000/status/#{id}")
+  end
 end
 
 def get_status(uri)
@@ -31,12 +45,8 @@ def get_status_until_complete!(uri)
   end
 end
 
-# Test case:
-# id = post_data!
-# puts get_status_until_complete!(status_uri(id))
-
 threads = []
-10.times do
+@request_count.times do
   threads << Thread.new do
     start = Time.now.to_f
     Thread.current[:id] = post_data!
@@ -52,4 +62,4 @@ total = threads.each do |t|
   puts "id: #{t[:id]}, #{t[:time_elapsed]}s elapsed"
 end.map{|t| t[:time_elapsed]}.inject(:+)
 
-puts "#{total / 10}s average"
+puts "#{total / @request_count}s average"
