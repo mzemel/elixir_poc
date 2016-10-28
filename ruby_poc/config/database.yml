@@ -10,8 +10,12 @@ default: &default
   timeout: 5000
 
 development:
-  <<: *default
-  database: db/development.sqlite3
+  adapter: postgresql
+  username: postgres
+  password: postgres
+  database: rails_image_svc_dev
+  hostname: localhost
+  pool_size: 10
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
