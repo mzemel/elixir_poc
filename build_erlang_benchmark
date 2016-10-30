@@ -1,0 +1,3 @@
+cp pidigits.hipe pidigits.erl
+erlc +native +"{hipe, [o3]}"  pidigits.erl
+rm pidigits.erl
