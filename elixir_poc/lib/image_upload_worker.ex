@@ -17,6 +17,7 @@ defmodule ImageUploadWorker do
     # TODO: Remove `name` attribute
     {:ok, upload} = Upload.changeset(%Upload{}, %{name: "test"}) |> Repo.insert
     ImageUploadStatus.start(upload.id)
+    # :timer.sleep(500)
     GenServer.cast(__MODULE__, {:process, %{id: upload.id, image: data}})
     {:ok, upload.id}
   end
@@ -35,7 +36,7 @@ defmodule ImageUploadWorker do
   def handle_cast({:process, data}, _state) do
     # Process image
     # Upload to S3
-    :timer.sleep(500)
+    # :timer.sleep(500)
     ImageUploadStatus.complete(data[:id])
     # { :noreply, %{id: nil, image: nil} } # This would reset the state to empty
     { :noreply, data }
