@@ -35,16 +35,6 @@ defmodule ImageUploadStatus do
     { :reply, statuses, statuses }
   end
 
-  # Potential refactor -- get these to work, then eliminate fn below
-  #
-  # def handle_call({:status, id}, _from, %{^id => status} = statuses) do
-  #   { :reply, {:ok, status}, statuses }
-  # end
-
-  # def handle_call({:status, id}, _from, statuses) do
-  #   { :reply, {:not_found, nil}, statuses }
-  # end
-
   def handle_call({:status, id}, _from, statuses) do
     case Map.get(statuses, id) do
       nil -> { :reply, {:ok, "not found"}, statuses }
